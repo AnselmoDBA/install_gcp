@@ -1,0 +1,56 @@
+################################################################
+#                                                              #
+#         Playbook Ansible - Criação de instancias GCP         #
+#         Criado por: Anselmo Borges                           #
+#         Data de criação: 07.01.2018                          #
+#         Ultima atualização: 07.01.2018                       #
+#                                                              #
+################################################################                                    
+
+- name: "Playbook de instalação MongoDB"
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    service_account_email: 116441019386-compute@developer.gserviceaccount.com
+    credentials_file: /home/anselmo/credentials/gcp/credential.json
+    project_id: geofusion-191021
+    machine_type: n1-standard-1
+    image: centos-7
+    zone: southamerica-east1-a
+    machine: n1-standard-1
+
+  tasks:
+  - name: "Criação de instancia GCP" 
+    gce:
+      instance_names: "{{ instance_name }}"
+      zone: "{{ zone }}"
+      machine_type: "{{ machine }}"
+      state: present
+      tags:
+        - mongodb
+        - criada-via-iac
+      disk_auto_delete: false
+      ip_forward: true
+      service_account_email: "{{ service_account_email }}"
+      credentials_file: "{{ credentials_file }}"
+      project_id: "{{ project_id }}"
+    register: gce
+
+  - name: "Criação de disco da instancia 1" 
+    gce_pd:
+      instance_name: "{{ instance_name }}"
+      delete_on_termination: yes
+      size_gb: 50
+      name: disk-3
+      mode: READ_WRITE
+      state: present
+      zone: "{{ zone }}"
+      service_account_email: "{{ service_account_email }}"
+      credentials_file: "{{ credentials_file }}"
+      project_id: "{{ project_id }}"
+
+  - name: "Esperando o SSH ficar ativo"
+    wait_for: host={{ item.public_ip }} port=22 delay=10 timeout=60
+    with_items: "{{ gce.instance_data }}"
