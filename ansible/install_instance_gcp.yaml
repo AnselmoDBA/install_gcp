@@ -31,6 +31,7 @@
       tags:
         - mongodb
         - criada-via-iac
+      disk: 32
       disk_auto_delete: false
       ip_forward: true
       service_account_email: "{{ service_account_email }}"
