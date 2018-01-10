@@ -16,22 +16,21 @@
     service_account_email: 116441019386-compute@developer.gserviceaccount.com
     credentials_file: /home/anselmo/credentials/gcp/credential.json
     project_id: geofusion-191021
-    machine_type: n1-standard-1
-    image: centos-7
+    machine_type: g1-small
+    image: centos-7-v20180104
     zone: southamerica-east1-a
-    machine: n1-standard-1
-
+  
   tasks:
   - name: "Criação de instancia GCP" 
     gce:
-      instance_names: "{{ instance_name }}"
+      instance_names: "{{ instance_name_1 }}","{{ instance_name_2 }}"
       zone: "{{ zone }}"
-      machine_type: "{{ machine }}"
+      machine_type: "{{ machine_type }}"
       state: present
       tags:
         - mongodb
         - criada-via-iac
-      disk: 32
+      image: "{{ image }}"
       disk_auto_delete: false
       ip_forward: true
       service_account_email: "{{ service_account_email }}"
@@ -41,10 +40,10 @@
 
   - name: "Criação de disco da instancia 1" 
     gce_pd:
-      instance_name: "{{ instance_name }}"
+      instance_name: "{{ instance_name_1 }}"
       delete_on_termination: yes
       size_gb: 50
-      name: disk-3
+      name: disk-1
       mode: READ_WRITE
       state: present
       zone: "{{ zone }}"
@@ -55,3 +54,20 @@
   - name: "Esperando o SSH ficar ativo"
     wait_for: host={{ item.public_ip }} port=22 delay=10 timeout=60
     with_items: "{{ gce.instance_data }}"
+
+    - name: "Criação de disco da instancia 1" 
+    gce_pd:
+      instance_name: "{{ instance_name_2 }}"
+      delete_on_termination: yes
+      size_gb: 50
+      name: disk-2
+      mode: READ_WRITE
+      state: present
+      zone: "{{ zone }}"
+      service_account_email: "{{ service_account_email }}"
+      credentials_file: "{{ credentials_file }}"
+      project_id: "{{ project_id }}"
+
+  - name: "Esperando o SSH ficar ativo"
+    wait_for: host={{ item.public_ip }} port=22 delay=10 timeout=60
+    with_items: "{{ gce.instance_data }}"  
