@@ -11,6 +11,9 @@ Playbook Ansible que faz a criação de um disco, de uma instancia CentOs e atac
 * Ansible instalado
 * Credential file criado e baixado para onde será executado o Playbook
 
+## Comando para execução:
+ansible-playbook --extra-vars "instance_name_1=mongodb01 instance_name_2=mongodb02" install_instance_gcp.yaml
+
 ## Considerações:
 O mesmo foi criado para execução de uma máquina por vez (devido ao disco), caso necessário duplique a criação do disco e insira 2 entradas ou quantas for necessárias no parametro "instance_name". O script tambem faz a conferencia do status do serviço SSH.
 
