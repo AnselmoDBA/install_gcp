@@ -23,7 +23,7 @@
   tasks:
   - name: "Criação de instancia GCP" 
     gce:
-      instance_names: "{{ instance_name_1 }}","{{ instance_name_2 }}"
+      instance_names: "{{ instance_name_1 }},{{ instance_name_2 }}"
       zone: "{{ zone }}"
       machine_type: "{{ machine_type }}"
       state: present
@@ -31,7 +31,7 @@
         - mongodb
         - criada-via-iac
       image: "{{ image }}"
-      disk_auto_delete: false
+      disk_auto_delete: true
       ip_forward: true
       service_account_email: "{{ service_account_email }}"
       credentials_file: "{{ credentials_file }}"
@@ -51,11 +51,7 @@
       credentials_file: "{{ credentials_file }}"
       project_id: "{{ project_id }}"
 
-  - name: "Esperando o SSH ficar ativo"
-    wait_for: host={{ item.public_ip }} port=22 delay=10 timeout=60
-    with_items: "{{ gce.instance_data }}"
-
-    - name: "Criação de disco da instancia 1" 
+  - name: "Criação de disco da instancia 2" 
     gce_pd:
       instance_name: "{{ instance_name_2 }}"
       delete_on_termination: yes
@@ -70,4 +66,4 @@
 
   - name: "Esperando o SSH ficar ativo"
     wait_for: host={{ item.public_ip }} port=22 delay=10 timeout=60
-    with_items: "{{ gce.instance_data }}"  
+    with_items: "{{ gce.instance_data }}"
